@@ -8,8 +8,10 @@ $(function() {
   const cartOverlay = $('.cart-overlay');
   const cartItems = $('.cart-items');
   const cartTotal = $('.cart-total');
-  const cartContent = $('.cart-content');
+  const cartContent = document.querySelector('.cart-content');
+  // const cartContent = $('.cart-content');
   const productsDOM = $('.products-center');
+  // console.log(cartContent);
 
   //cart
   let cart = [];
@@ -78,10 +80,59 @@ $(function() {
           // save cart in local storage
           Storage.saveCart(cart);
           // set cart values
+          this.setCartValues(cart);
           // display cart item
+          this.addCartItem(cartItem);
           // show the cart
+          this.showCart();
         });
       });
+    }
+    setCartValues(cart) {
+      let tempTotal = 0;
+      let itemsTotal = 0;
+      cart.map(item => {
+        tempTotal += item.price * item.amount;
+        itemsTotal += item.amount;
+      });
+      cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
+      cartItems.innerText = itemsTotal;
+    }
+    addCartItem(item) {
+      const div = document.createElement('div');
+      $(div).addClass('cart-item');
+      $(div).html(`<img src="${item.image}" alt="product">
+          <div>
+            <h4>${item.title}</h4>
+            <h5>$${item.price}</h5>
+            <span class="remove-item" data-id='${item.id}'>remove</span>
+          </div>
+          <div>
+            <i class="fas fa-chevron-up" data-id='${item.id}'></i>
+            <p class="item-amount">${item.amount}</p>
+            <i class="fas fa-chevron-down" data-id='${item.id}'></i>
+          </div>`);
+
+      $(cartContent).append(div);
+    }
+    showCart() {
+      $(cartOverlay).addClass('transparentBcg');
+      $(cartDOM).addClass('showCart');
+    }
+
+    setupAPP() {
+      cart = Storage.getCart();
+      this.setCartValues(cart);
+      this.populateCart(cart);
+      $(cartBtn).click(this.showCart);
+      $(closeCartBtn).click(this.hideCart);
+    }
+    populateCart(cart) {
+      cart.forEach(item => this.addCartItem(item));
+    }
+    hideCart() {
+      $(cartOverlay).removeClass('transparentBcg');
+      $(cartDOM).removeClass('showCart');
     }
   }
 
@@ -97,11 +148,19 @@ $(function() {
     static saveCart(cart) {
       localStorage.setItem('cart', JSON.stringify(cart));
     }
+    static getCart() {
+      return localStorage.getItem('cart')
+        ? JSON.parse(localStorage.getItem('cart'))
+        : [];
+    }
   }
 
   $(document).ready(() => {
     const ui = new UI();
     const products = new Products();
+
+    // setup app
+    ui.setupAPP();
 
     //get all products
     products

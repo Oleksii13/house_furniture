@@ -215,6 +215,7 @@ body {
     padding: 1.5rem;
     transition: var(--mainTransition);
     transform: translateX(100%);
+
 }
 
 .showCart {
