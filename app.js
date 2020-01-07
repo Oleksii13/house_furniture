@@ -13,6 +13,8 @@ $(function() {
 
   //cart
   let cart = [];
+  // buttons
+  let buttonsDOM = [];
 
   //getting the products
   class Products {
@@ -58,6 +60,28 @@ $(function() {
     }
     getBagButtons() {
       const buttons = [...$('.bag-btn')];
+      buttonsDOM = buttons;
+      buttons.forEach(button => {
+        let id = button.dataset.id;
+        let inCart = cart.find(item => item.id === id);
+        if (inCart) {
+          button.innerText = 'In Cart';
+          button.disabled = true;
+        }
+        $(button).click(event => {
+          event.target.innerText = 'In Cart';
+          event.target.disabled = true;
+          // grt product from the products using id
+          let cartItem = { ...Storage.getProduct(id), amount: 1 };
+          // add product to the cart
+          cart = [...cart, cartItem];
+          // save cart in local storage
+          Storage.saveCart(cart);
+          // set cart values
+          // display cart item
+          // show the cart
+        });
+      });
     }
   }
 
@@ -65,6 +89,13 @@ $(function() {
   class Storage {
     static saveProducts(products) {
       localStorage.setItem('products', JSON.stringify(products));
+    }
+    static getProduct(id) {
+      let products = JSON.parse(localStorage.getItem('products'));
+      return products.find(product => product.id === id);
+    }
+    static saveCart(cart) {
+      localStorage.setItem('cart', JSON.stringify(cart));
     }
   }
 
