@@ -59,7 +59,9 @@ $(function() {
   }
 
   //local storage});
-  class Storage {}
+  class Storage {
+    
+  }
 
   $(document).ready(() => {
     const ui = new UI();
