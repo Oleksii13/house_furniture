@@ -56,11 +56,16 @@ $(function() {
         productsDOM.html(result);
       });
     }
+    getBagButtons() {
+      const buttons = [...$('.bag-btn')];
+    }
   }
 
   //local storage});
   class Storage {
-    
+    static saveProducts(products) {
+      localStorage.setItem('products', JSON.stringify(products));
+    }
   }
 
   $(document).ready(() => {
@@ -68,6 +73,14 @@ $(function() {
     const products = new Products();
 
     //get all products
-    products.getProducts().then(products => ui.displayProducts(products));
+    products
+      .getProducts()
+      .then(products => {
+        ui.displayProducts(products);
+        Storage.saveProducts(products);
+      })
+      .then(() => {
+        ui.getBagButtons();
+      });
   });
 });
