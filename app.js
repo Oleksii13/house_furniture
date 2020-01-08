@@ -8,10 +8,11 @@ $(function() {
   const cartOverlay = $('.cart-overlay');
   const cartItems = $('.cart-items');
   const cartTotal = $('.cart-total');
+  // change error here issue !!!!!!!!!!!!////////////
   const cartContent = document.querySelector('.cart-content');
   // const cartContent = $('.cart-content');
+  /////////////////////////////////////////////////////////
   const productsDOM = $('.products-center');
-  // console.log(cartContent);
 
   //cart
   let cart = [];
@@ -50,7 +51,7 @@ $(function() {
           <img src="${product.image}" alt="product" class="product-img" />
           <button class="bag-btn" data-id=${product.id}>
             <i class="fas fa-shopping-cart"></i>
-            add to bag
+            add to cart
           </button>
         </div>
         <h3>${product.title}</h3>
@@ -99,21 +100,36 @@ $(function() {
       cartItems.innerText = itemsTotal;
     }
     addCartItem(item) {
-      const div = document.createElement('div');
-      $(div).addClass('cart-item');
-      $(div).html(`<img src="${item.image}" alt="product">
+      // version one
+      // const div = document.createElement('div');
+      // $(div).addClass('cart-item');
+      // $(div).html(`<img src="${item.image}" alt="product">
+      //     <div>
+      //       <h4>${item.title}</h4>
+      //       <h5>$${item.price}</h5>
+      //       <span class="remove-item" data-id='${item.id}'>remove</span>
+      //     </div>
+      //     <div>
+      //       <i class="fas fa-chevron-up" data-id='${item.id}'></i>
+      //       <p class="item-amount">${item.amount}</p>
+      //       <i class="fas fa-chevron-down" data-id='${item.id}'></i>
+      //     </div>`);
+      // $(cartContent).append(div);
+      // version 2
+      $(
+        cartContent
+      ).append(`<div class='cart-item'><img src='${item.image}' alt='product'>
           <div>
             <h4>${item.title}</h4>
             <h5>$${item.price}</h5>
-            <span class="remove-item" data-id='${item.id}'>remove</span>
+            <span class='remove-item' data-id='${item.id}'>remove</span>
           </div>
           <div>
-            <i class="fas fa-chevron-up" data-id='${item.id}'></i>
-            <p class="item-amount">${item.amount}</p>
-            <i class="fas fa-chevron-down" data-id='${item.id}'></i>
-          </div>`);
-
-      $(cartContent).append(div);
+            <i class='fas fa-chevron-up' data-id='${item.id}'></i>
+            <p class='item-amount'>${item.amount}</p>
+            <i class='fas fa-chevron-down' data-id='${item.id}'></i>
+          </div></div>`);
+      // console.log(cartContent);
     }
     showCart() {
       $(cartOverlay).addClass('transparentBcg');
@@ -133,6 +149,70 @@ $(function() {
     hideCart() {
       $(cartOverlay).removeClass('transparentBcg');
       $(cartDOM).removeClass('showCart');
+    }
+
+    cartLogic() {
+      //clear cart button
+      $(clearCartBtn).click(() => {
+        this.clearCart();
+      });
+      //clear functionality
+      $(cartContent).click(event => {
+        if (event.target.classList.contains('remove-item')) {
+          let removeItem = event.target;
+          let id = removeItem.dataset.id;
+          /////////////////////////////////
+          //vanilla JS version
+          // cartContent.removeChild(removeItem.parentElement.parentElement);
+          // $(cartContent)
+          //   .children(removeItem.parentElement.parentElement)
+          //   .remove();
+          /////////////////////////////////////
+          // jquery version
+          $(removeItem)
+            .parent()
+            .parent()
+            .remove();
+          this.removeItem(id);
+        } else if (event.target.classList.contains('fa-chevron-up')) {
+
+        }
+      });
+    }
+    clearCart() {
+      let cartItems = cart.map(item => item.id);
+      cartItems.forEach(id => this.removeItem(id));
+      while (cartContent.children.length > 0) {
+        $(cartContent)
+          .find(':first-child')
+          .remove();
+        // console.log(cartContent);
+      }
+      this.hideCart();
+    }
+    removeItem(id) {
+      cart = cart.filter(item => item.id !== id);
+      this.setCartValues(cart);
+      Storage.saveCart(cart);
+      let button = this.getSingleButton(id);
+      button.disabled = false;
+
+      // ////////////////////////////
+      // .html() does not work
+
+      // $(button)
+      //   .empty()
+      //   .append($("<i class='fas fa-shopping-cart'></i>add to text"))
+      //   .append('add to cart');
+
+      $(button).html(`<i class='fas fa-shopping-cart'></i>add to text`);
+
+      // console.log(button);
+
+      // //////////////////////////////////////
+    }
+    getSingleButton(id) {
+      return buttonsDOM.find(button => button.dataset.id === id);
     }
   }
 
@@ -155,22 +235,21 @@ $(function() {
     }
   }
 
-  $(document).ready(() => {
-    const ui = new UI();
-    const products = new Products();
+  const ui = new UI();
+  const products = new Products();
 
-    // setup app
-    ui.setupAPP();
+  // setup app
+  ui.setupAPP();
 
-    //get all products
-    products
-      .getProducts()
-      .then(products => {
-        ui.displayProducts(products);
-        Storage.saveProducts(products);
-      })
-      .then(() => {
-        ui.getBagButtons();
-      });
-  });
+  //get all products
+  products
+    .getProducts()
+    .then(products => {
+      ui.displayProducts(products);
+      Storage.saveProducts(products);
+    })
+    .then(() => {
+      ui.getBagButtons();
+      ui.cartLogic();
+    });
 });
