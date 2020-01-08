@@ -7,10 +7,12 @@ $(function() {
   const cartDOM = $('.cart');
   const cartOverlay = $('.cart-overlay');
   const cartItems = $('.cart-items');
+  // const cartItems = document.querySelector('.cart-items');
   const cartTotal = $('.cart-total');
+  // const cartTotal = document.querySelector('.cart-total');
   // change error here issue !!!!!!!!!!!!////////////
-  const cartContent = document.querySelector('.cart-content');
-  // const cartContent = $('.cart-content');
+  // const cartContent = document.querySelector('.cart-content');
+  const cartContent = $('.cart-content');
   /////////////////////////////////////////////////////////
   const productsDOM = $('.products-center');
 
@@ -96,8 +98,10 @@ $(function() {
         tempTotal += item.price * item.amount;
         itemsTotal += item.amount;
       });
-      cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
-      cartItems.innerText = itemsTotal;
+      // cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
+      // cartItems.innerText = itemsTotal;
+      $(cartTotal).html(parseFloat(tempTotal.toFixed(2)));
+      $(cartItems).html(itemsTotal);
     }
     addCartItem(item) {
       // version one
@@ -175,14 +179,40 @@ $(function() {
             .remove();
           this.removeItem(id);
         } else if (event.target.classList.contains('fa-chevron-up')) {
-
+          let addAmount = event.target;
+          let id = addAmount.dataset.id;
+          let tempItem = cart.find(item => item.id === id);
+          tempItem.amount = tempItem.amount + 1;
+          Storage.saveCart(cart);
+          this.setCartValues(cart);
+          $(addAmount)
+            .next()
+            .html(tempItem.amount);
+        } else if (event.target.classList.contains('fa-chevron-down')) {
+          let lowerAmount = event.target;
+          let id = lowerAmount.dataset.id;
+          let tempItem = cart.find(item => item.id === id);
+          tempItem.amount = tempItem.amount - 1;
+          if (tempItem.amount > 0) {
+            Storage.saveCart(cart);
+            this.setCartValues(cart);
+            $(lowerAmount)
+              .prev()
+              .html(tempItem.amount);
+          } else {
+            $(lowerAmount)
+              .parent()
+              .parent()
+              .remove();
+            this.removeItem(id);
+          }
         }
       });
     }
     clearCart() {
       let cartItems = cart.map(item => item.id);
       cartItems.forEach(id => this.removeItem(id));
-      while (cartContent.children.length > 0) {
+      while ($(cartContent).children().length > 0) {
         $(cartContent)
           .find(':first-child')
           .remove();
