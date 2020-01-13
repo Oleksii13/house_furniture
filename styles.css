@@ -165,7 +165,7 @@ body {
 .product-img {
     display: block;
     width: 100%;
-    min-height: 12rem;
+    height: 12rem;
     transition: var(--mainTransition);
 }
 
